@@ -63,7 +63,7 @@ def get_markdown(issues, title):
         markdown_string += get_markdown_for_subsystem(subsystem)
 
         subsystem_issues = get_issues_by_subsystem(subsystem, issues)
-        sorted_subsystem_issues = sorted(subsystem_issues, key=lambda issue: issue["id"])
+        sorted_subsystem_issues = sorted(subsystem_issues, key=lambda issue: int(issue["numberInProject"]))
         for subsystem_issue in sorted_subsystem_issues:
             markdown_string += get_markdown_for_issue(subsystem_issue)
 
