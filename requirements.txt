@@ -1,3 +1,4 @@
 youtrack==0.1.69
 Markdown==3.3.4
 xhtml2pdf==0.2.5
+PyYAML==5.4.1

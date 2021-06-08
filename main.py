@@ -1,24 +1,31 @@
-import logging
+import logging, logging.config, yaml
 import urllib.request
 import argparse
+from pprint import pprint
+
 import generator
 import youtrack_lib
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logging.config.dictConfig(yaml.load(open("logging-config.yaml", 'r')))
+
+
 def process_attachments(youtrack, issue):
-    logging.debug(f"Processing attachments for issue {issue['id']}...")
+    logger.debug(f"Processing attachments for issue {issue['id']}...")
     attachments = youtrack.getAttachments(issue['id'])
 
     for attachment in attachments:
-        logging.debug(f"Processing attachment '{attachment['name']}' for issue {issue['id']}...")
+        logger.debug(f"Processing attachment '{attachment['name']}' for issue {issue['id']}...")
         url = attachment["url"]
         original_name = attachment['name']
         destination_name = f"{issue['id']}-{attachment['id']}-{attachment['name']}"
         destination_file = f"out/{destination_name}"
 
-        logging.debug(f"Downloading {url} to {destination_file} ...")
+        logger.debug(f"Downloading {url} to {destination_file} ...")
         urllib.request.urlretrieve(url, destination_file)
 
-        logging.debug(f"Rewriting markdown to point to downloaded file...")
+        logger.debug(f"Rewriting markdown to point to downloaded file...")
 
         if "Release Notes" in issue:
             issue["Release Notes"] = issue["Release Notes"].replace(original_name, destination_name)
@@ -35,8 +42,6 @@ def main(url: str, username: str, password: str, output_basename: str, title: st
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-
     parser = argparse.ArgumentParser(description='YouTrack Release Notes Report')
 
     parser.add_argument('url', type=str,

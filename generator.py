@@ -4,6 +4,7 @@ from xhtml2pdf import pisa
 from shutil import copyfile
 from youtrack_lib import get_subsystems_from_issues, get_issues_by_subsystem
 
+logger = logging.getLogger(__name__)
 
 def get_markdown_for_frontmatter(title):
     markdown_string = f"""
@@ -26,7 +27,7 @@ def get_markdown_for_subsystem(subsystem):
 
 def get_markdown_for_issue(issue):
     id = issue['id']
-    logging.debug(f"Generating markdown for issue '{id}'...")
+    logger.debug(f"Generating markdown for issue '{id}'...")
 
     summary = issue['summary']
     # type = issue['Typ']
@@ -50,7 +51,7 @@ def get_markdown_for_issue(issue):
     else:
         markdown_string = ""
 
-    logging.debug(f"Generated markdown for issue '{id}'")
+    logger.debug(f"Generated markdown for issue '{id}'")
     return markdown_string
 
 
@@ -71,9 +72,9 @@ def get_markdown(issues, title):
 
 
 def generate_html_from_markdown(markdown_string):
-    logging.debug("Generating HTML from markdown...")
+    logger.debug("Generating HTML from markdown...")
     html = markdown.markdown(markdown_string)
-    logging.debug("Generated HTML from markdown")
+    logger.debug("Generated HTML from markdown")
 
     with open("out/intermediate.html", "w", encoding="utf8") as html_file:
         html_file.writelines("""
@@ -95,7 +96,7 @@ def generate_html_from_markdown(markdown_string):
 
 
 def generate_pdf_from_markdown(markdown_string, output_filename):
-    logging.debug(f"Generating PDF '{output_filename}'...")
+    logger.debug(f"Generating PDF '{output_filename}'...")
 
     html = generate_html_from_markdown(markdown_string)
 
