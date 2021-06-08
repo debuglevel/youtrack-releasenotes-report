@@ -63,7 +63,8 @@ def get_markdown(issues, title):
         markdown_string += get_markdown_for_subsystem(subsystem)
 
         subsystem_issues = get_issues_by_subsystem(subsystem, issues)
-        for subsystem_issue in subsystem_issues:
+        sorted_subsystem_issues = sorted(subsystem_issues, key=lambda issue: issue["id"])
+        for subsystem_issue in sorted_subsystem_issues:
             markdown_string += get_markdown_for_issue(subsystem_issue)
 
     with open("out/intermediate.md", "w", encoding="utf8") as md_file:
