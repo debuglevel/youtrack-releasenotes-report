@@ -59,6 +59,7 @@ def get_markdown(issues, title):
     markdown_string = get_markdown_for_frontmatter(title)
 
     subsystems = get_subsystems_from_issues(issues)
+    subsystems.sort()
     for subsystem in subsystems:
         markdown_string += get_markdown_for_subsystem(subsystem)
 

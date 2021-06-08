@@ -13,7 +13,7 @@ def get_issues_by_subsystem(subsystem, issues):
 
 def get_subsystems_from_issues(issues):
     logger.debug(f"Getting subsystems from {len(issues)} issues...")
-    subsystems = set(map(lambda issue: issue["Teilsystem"], issues))
+    subsystems = list(set(map(lambda issue: issue["Teilsystem"], issues))) # unique (set), but ordered (list)
     logger.debug(f"Got {len(subsystems)} subsystems from {len(issues)} issues...")
     return subsystems
 
