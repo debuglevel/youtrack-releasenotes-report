@@ -1,0 +1,7 @@
+FIELD_NAME=DevPackage
+FIELD_VALUE=Package 1
+OUTPUT_BASENAME=Release Notes
+HOST=http://youtrack/
+USER=admin
+PASSWORD=SUPERSECRET
+TITLE=Release Notes

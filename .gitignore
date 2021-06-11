@@ -1,3 +1,5 @@
+environment.prod
+out.docker
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm,python,venv,windows,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm,python,venv,windows,linux

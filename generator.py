@@ -7,9 +7,10 @@ from youtrack_lib import get_subsystems_from_issues, get_issues_by_subsystem
 logger = logging.getLogger(__name__)
 
 def get_markdown_for_frontmatter(title):
-    markdown_string = f"""
-# {title}
-    """
+#     markdown_string = f"""
+# # {title}
+#     """
+    markdown_string = ""
     return markdown_string
 
 
@@ -19,7 +20,7 @@ def get_markdown_for_subsystem(subsystem):
     # title = f"{title}"
     title = f"{subsystem}"
     markdown_string = f"""
-## {title}
+# {title}
     """
 
     return markdown_string
@@ -42,7 +43,7 @@ def get_markdown_for_issue(issue):
 
     if release_notes is not None:
         markdown_string = f"""
-### {title}
+## {title}
 
 {release_notes}
 
@@ -93,8 +94,6 @@ def generate_html_from_markdown(markdown_string):
 """)
 
         copyfile("print.css", "out/print.css")
-
-        copyfile("pandoc.css", "out/pandoc.css") # TODO: really does not belong here.
 
     return html
 

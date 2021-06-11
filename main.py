@@ -38,7 +38,7 @@ def main(url: str, username: str, password: str, output_basename: str, title: st
     issues_by_field = youtrack_lib.get_issues_by_field(youtrack, field_name, field_value)
 
     markdown_string = generator.get_markdown(issues_by_field, title)
-    generator.generate_pdf_from_markdown(markdown_string, pdf_filename)
+    # generator.generate_pdf_from_markdown(markdown_string, pdf_filename)
 
 
 if __name__ == '__main__':
