@@ -63,7 +63,7 @@ def get_issues_by_field(youtrack, field_name, field_value):
                 filtered_issues.append(issue)
             else:
                 logger.debug(
-                    f"Not adding {issue['id']} because '{field_name}'!='{field_value} (but f{issue[field_name]})'")
+                    f"Not adding {issue['id']} because '{field_name}'!='{field_value} (but {issue[field_name]})'")
         except KeyError:
             # CAVEAT: default values seem to be missing here :-(
             logger.debug(f"Not adding {issue['id']} because '{field_name}' is missing")
