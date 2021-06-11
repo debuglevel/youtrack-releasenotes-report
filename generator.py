@@ -94,6 +94,8 @@ def generate_html_from_markdown(markdown_string):
 
         copyfile("print.css", "out/print.css")
 
+        copyfile("pandoc.css", "out/pandoc.css") # TODO: really does not belong here.
+
     return html
 
 
