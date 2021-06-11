@@ -47,12 +47,7 @@ def process_attachments(youtrack, issue):
 
 def get_issues(youtrack):
     issues = youtrack.getAllIssues()
-
-    for issue in issues:
-        process_attachments(youtrack, issue)
-
-    filtered_issues = filter(lambda issue: "OT" in issue["id"], issues)
-    return filtered_issues
+    return issues
 
 
 def get_issues_by_field(youtrack, field_name, field_value):
@@ -72,6 +67,9 @@ def get_issues_by_field(youtrack, field_name, field_value):
         except KeyError:
             # CAVEAT: default values seem to be missing here :-(
             logger.debug(f"Not adding {issue['id']} because '{field_name}' is missing")
+
+    for filtered_issue in filtered_issues:
+        process_attachments(youtrack, filtered_issue)
 
     logger.debug(f"Got {len(filtered_issues)} issues for '{field_name}'='{field_value}'")
     return filtered_issues
