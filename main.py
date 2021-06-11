@@ -12,7 +12,7 @@ logging.config.dictConfig(yaml.load(open("logging-config.yaml", 'r')))
 
 
 def process_attachments(youtrack, issue):
-    logger.debug(f"Processing attachments for issue {issue['id']}...")
+    logger.debug(f"Processing attachments for issue {issue['id']} (if any)...")
     attachments = youtrack.getAttachments(issue['id'])
 
     for attachment in attachments:
@@ -22,13 +22,19 @@ def process_attachments(youtrack, issue):
         destination_name = f"{issue['id']}-{attachment['id']}-{attachment['name']}"
         destination_file = f"out/{destination_name}"
 
+        if "Release Notes" not in issue:
+            logger.debug(f"Skipping '{attachment['name']}' as no Release Notes found...")
+            continue
+
+        if original_name not in issue["Release Notes"]:
+            logger.debug(f"Skipping '{attachment['name']}' as not referenced in {issue['id']} Release Notes...")
+            continue
+
         logger.debug(f"Downloading {url} to {destination_file} ...")
         urllib.request.urlretrieve(url, destination_file)
 
         logger.debug(f"Rewriting markdown to point to downloaded file...")
-
-        if "Release Notes" in issue:
-            issue["Release Notes"] = issue["Release Notes"].replace(original_name, destination_name)
+        issue["Release Notes"] = issue["Release Notes"].replace(original_name, destination_name)
 
 
 def main(url: str, username: str, password: str, output_basename: str, title: str, field_name: str, field_value: str):

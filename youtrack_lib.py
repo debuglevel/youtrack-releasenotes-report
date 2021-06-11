@@ -4,6 +4,7 @@ from main import process_attachments
 
 logger = logging.getLogger(__name__)
 
+
 def get_issues_by_subsystem(subsystem, issues):
     logger.debug(f"Getting issues for subsystem '{subsystem}' from {len(issues)} issues...")
     filtered_issues = set(filter(lambda issue: issue["Teilsystem"] == subsystem, issues))
