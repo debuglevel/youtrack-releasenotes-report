@@ -42,6 +42,17 @@ h2 {
     margin-left: 1.6em;
  }
 
+/* TODO: this resizes the font when printed?! */
+img {
+    max-width: 100%;
+}
+/*
+ img {
+        max-width:100% !important;
+        max-height: none !important;
+        height: 100% !important;
+ }*/
+
  a {
      page-break-inside:avoid
 }
@@ -51,7 +62,7 @@ h2 {
 }
 
  h1, h2, h3, h4, h5, h6 {
-     page-break-after:avoid;
+     page-break-after: avoid;
      page-break-inside:avoid
 }
  img {
