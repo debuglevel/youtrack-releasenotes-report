@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "= Preparing output directory..."
-mkdir out
+mkdir -p out
 rm out/*
 
 echo "= Fetching release notes and generating Markdown..."
