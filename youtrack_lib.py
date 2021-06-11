@@ -1,6 +1,6 @@
 import logging
 from youtrack.connection import Connection as YouTrack
-from main import process_attachments
+import urllib.request
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,32 @@ def get_subsystems_from_issues(issues):
     subsystems = list(set(map(lambda issue: issue["Teilsystem"], issues))) # unique (set), but ordered (list)
     logger.debug(f"Got {len(subsystems)} subsystems from {len(issues)} issues...")
     return subsystems
+
+
+def process_attachments(youtrack, issue):
+    logger.debug(f"Processing attachments for issue {issue['id']} (if any)...")
+    attachments = youtrack.getAttachments(issue['id'])
+
+    for attachment in attachments:
+        logger.debug(f"Processing attachment '{attachment['name']}' for issue {issue['id']}...")
+        url = attachment["url"]
+        original_name = attachment['name']
+        destination_name = f"{issue['id']}-{attachment['id']}-{attachment['name']}"
+        destination_file = f"out/{destination_name}"
+
+        if "Release Notes" not in issue:
+            logger.debug(f"Skipping '{attachment['name']}' as no Release Notes found...")
+            continue
+
+        if original_name not in issue["Release Notes"]:
+            logger.debug(f"Skipping '{attachment['name']}' as not referenced in {issue['id']} Release Notes...")
+            continue
+
+        logger.debug(f"Downloading {url} to {destination_file} ...")
+        urllib.request.urlretrieve(url, destination_file)
+
+        logger.debug(f"Rewriting markdown to point to downloaded file...")
+        issue["Release Notes"] = issue["Release Notes"].replace(original_name, destination_name)
 
 
 def get_issues(youtrack):
