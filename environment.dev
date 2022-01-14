@@ -1,7 +1,7 @@
 FIELD_NAME=DevPackage
 FIELD_VALUE=Package 1
 OUTPUT_BASENAME=Release Notes
-HOST=http://youtrack/
-USER=admin
-PASSWORD=SUPERSECRET
+YOUTRACK_URL=http://youtrack:8080/api
+HUB_URL=http://youtrack:8080/hub/api/rest
+TOKEN=perm:FOOBAR
 TITLE=Release Notes

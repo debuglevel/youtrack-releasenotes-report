@@ -10,27 +10,34 @@ logger = logging.getLogger(__name__)
 logging.config.dictConfig(yaml.load(open("logging-config.yaml", 'r')))
 
 
-def main(url: str, username: str, password: str, output_basename: str, title: str, field_name: str, field_value: str):
-    pdf_filename = f"out/{output_basename}.pdf"
+def main(youtrack_url: str, hub_url: str, token: str, output_basename: str, title: str, field_name: str,
+         field_value: str):
+    # pdf_filename = f"out/{output_basename}.pdf"
 
-    youtrack = youtrack_lib.login(url, username, password)
-    issues_by_field = youtrack_lib.get_issues_by_field(youtrack, field_name, field_value)
+    logger.info(f"Creating YouTrack Client...")
+    youtrack_client = youtrack_lib.create_client(youtrack_url, hub_url, token)
 
+    logger.info(f"Getting issues with '{field_name}'='{field_value}'...")
+    issues_by_field = youtrack_lib.get_issues_by_field(youtrack_client, field_name, field_value)
+    logger.info(f"Got {len(issues_by_field)} issues")
+
+    logger.info(f"Getting Markdown...")
     markdown_string = generator.get_markdown(issues_by_field, title)
+    generator.write_markdown_file("out/intermediate.md", markdown_string)
     # generator.generate_pdf_from_markdown(markdown_string, pdf_filename)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='YouTrack Release Notes Report')
 
-    parser.add_argument('url', type=str,
-                        help='YouTrack URL (e.g. http://youtrack.debuglevel.com:8080/)')
+    parser.add_argument('youtrack_url', type=str,
+                        help='YouTrack URL (e.g. https://youtrack.jetbrains.com/api)')
 
-    parser.add_argument('username', type=str,
-                        help='Username to login')
+    parser.add_argument('hub_url', type=str,
+                        help='Hub URL (e.g. https://hub.jetbrains.com/api/rest)')
 
-    parser.add_argument('password', type=str,
-                        help='Password to login')
+    parser.add_argument('token', type=str,
+                        help='Token to login')
 
     parser.add_argument('--field-name', type=str,
                         help='Issue field name to search for (e.g. "Development Package")')
@@ -46,4 +53,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    main(args.url, args.username, args.password, args.output_basename, args.title, args.field_name, args.field_value)
+    main(args.youtrack_url, args.hub_url, args.token, args.output_basename, args.title, args.field_name,
+         args.field_value)
