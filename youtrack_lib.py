@@ -78,106 +78,108 @@ def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue):
                                                                                               destination_name)
 
 
-def get_enhanced_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> List[Issue]:
-    logger.debug(f"Getting all issues by query '{query}'...")
-    issues = get_issues.sync(client=youtrack_client, top=10000, query=query)
-    logger.debug(f"Response contains {len(issues)} issues")
+def add_custom_fields(youtrack_client: AuthenticatedClient, issue: Issue) -> Issue:
+    logger.debug(f"Adding custom fields to issue {issue.id_readable}...")
 
     # The IssueCustomField model seems broken and not containing fields like "name" and "value".
     # Workaround: Get custom fields out of the raw response and put them in a custom_fields2 dict.
     # TODO: maybe this can already be get out of get_issues_id_custom_fields.sync_detailed() - API should support this
-    for issue in issues:
-        logger.debug(f"Getting custom fields for {issue.id_readable}...")
-        custom_fields = get_issues_id_custom_fields.sync(client=youtrack_client, id=issue.id)
-        logger.debug(f"Response has {len(custom_fields)} custom fields in issue {issue.id_readable}")
 
-        issue.custom_fields2 = dict()
+    logger.debug(f"Getting custom fields for {issue.id_readable}...")
+    custom_fields = get_issues_id_custom_fields.sync(client=youtrack_client, id=issue.id)
+    logger.debug(f"Response has {len(custom_fields)} custom fields in issue {issue.id_readable}")
 
-        for custom_field in custom_fields:
-            logger.debug(f"Getting custom field {custom_field.id} for {issue.id_readable}...")
+    issue.custom_fields2 = dict()
 
-            # CAVEAT: Setting fields to include "text" and "markdownText" in value field, which is not queried by default.
-            json_bytes = get_issues_id_custom_fields_issue_custom_field_id.sync_detailed(client=youtrack_client,
-                                                                                        id=issue.id,
-                                                                                        issue_custom_field_id=custom_field.id,
-                                                                                        fields="$type,id,name,projectCustomField($type,field($type,fieldType($type,id),id,localizedName,name),id),value($type,id,name,text,markdownText)"
-                                                                                         ).content
-            json_string = str(json_bytes, 'UTF-8')
-            json_object = json.loads(json_string)
-            #pprint(json_object)
+    for custom_field in custom_fields:
+        logger.debug(f"Getting custom field {custom_field.id} for {issue.id_readable}...")
 
-            # logger.debug(f"Added custom field '{json_object['name']}'='{json_object['value']}'...")
-            # json_object.value can be the value or json_object.value.name
+        # CAVEAT: Setting fields to include "text" and "markdownText" in value field, which is not queried by default.
+        json_bytes = get_issues_id_custom_fields_issue_custom_field_id.sync_detailed(client=youtrack_client,
+                                                                                    id=issue.id,
+                                                                                    issue_custom_field_id=custom_field.id,
+                                                                                    fields="$type,id,name,projectCustomField($type,field($type,fieldType($type,id),id,localizedName,name),id),value($type,id,name,text,markdownText)"
+                                                                                     ).content
+        json_string = str(json_bytes, 'UTF-8')
+        json_object = json.loads(json_string)
+        #pprint(json_object)
 
-            if "value" not in json_object:
-                # logger.debug("'value' not available")
-                value = "NO_VALUE_KEY"
-            elif json_object["value"] is None:
-                # logger.debug("'value' is None")
-                value = "NOT_SET"
-            elif isinstance(json_object["value"], str):
-                # logger.debug("'value' is Str")
-                value = json_object["value"]
-            elif isinstance(json_object["value"], dict):
-                # logger.debug("'value' is Dict")
+        # logger.debug(f"Added custom field '{json_object['name']}'='{json_object['value']}'...")
+        # json_object.value can be the value or json_object.value.name
 
-                if "text" in json_object["value"] and isinstance(json_object["value"]["text"], str):
-                    # logger.debug("'value.text' is Str")
-                    value = json_object["value"]["text"]
-                elif "name" in json_object["value"] and isinstance(json_object["value"]["name"], str):
-                    # logger.debug("'value.name' is Str")
-                    value = json_object["value"]["name"]
-                else:
-                    value = "UNHANDLED CASE"
+        if "value" not in json_object:
+            # logger.debug("'value' not available")
+            value = "NO_VALUE_KEY"
+        elif json_object["value"] is None:
+            # logger.debug("'value' is None")
+            value = "NOT_SET"
+        elif isinstance(json_object["value"], str):
+            # logger.debug("'value' is Str")
+            value = json_object["value"]
+        elif isinstance(json_object["value"], dict):
+            # logger.debug("'value' is Dict")
 
-                # if "text" not in json_object["value"]:
-                #     # logger.debug("'value.name' not available")
-                #     value = "NO_VALUE_TEXT_KEY"
-                # elif json_object["value"]["text"] is None:
-                #     # logger.debug("'value.name' is None")
-                #     value = "NOT_SET"
-                # elif isinstance(json_object["value"]["text"], str):
-                #     # logger.debug("'value.name' is Str")
-                #     value = json_object["value"]["text"]
-                # else:
-                #     logger.debug(
-                #         f"'value.text' is neither Str nor Dict nor None (is '{type(json_object['value']['text'])}')")
-                #     pprint(json_object)
-                #     value = "UNKNOWN TYPE"
-                #
-                # if "name" not in json_object["value"]:
-                #     # logger.debug("'value.name' not available")
-                #     value = "NO_VALUE_NAME_KEY"
-                # elif json_object["value"]["name"] is None:
-                #     # logger.debug("'value.name' is None")
-                #     value = "NOT_SET"
-                # elif isinstance(json_object["value"]["name"], str):
-                #     # logger.debug("'value.name' is Str")
-                #     value = json_object["value"]["name"]
-                # else:
-                #     logger.debug(
-                #         f"'value.name' is neither Str nor Dict nor None (is '{type(json_object['value']['name'])}')")
-                #     pprint(json_object)
-                #     value = "UNKNOWN TYPE"
-
+            if "text" in json_object["value"] and isinstance(json_object["value"]["text"], str):
+                # logger.debug("'value.text' is Str")
+                value = json_object["value"]["text"]
+            elif "name" in json_object["value"] and isinstance(json_object["value"]["name"], str):
+                # logger.debug("'value.name' is Str")
+                value = json_object["value"]["name"]
             else:
-                logger.debug(f"'value' is neither Str nor Dict nor None (is '{type(json_object['value'])}')")
-                #pprint(json_object)
-                value = "UNKNOWN TYPE"
+                value = "UNHANDLED CASE"
 
-            issue.custom_fields2[json_object["name"]] = value
-            logger.debug(f"Added custom field '{json_object['name']}'='{value}' to issue {issue.id_readable}")
+            # if "text" not in json_object["value"]:
+            #     # logger.debug("'value.name' not available")
+            #     value = "NO_VALUE_TEXT_KEY"
+            # elif json_object["value"]["text"] is None:
+            #     # logger.debug("'value.name' is None")
+            #     value = "NOT_SET"
+            # elif isinstance(json_object["value"]["text"], str):
+            #     # logger.debug("'value.name' is Str")
+            #     value = json_object["value"]["text"]
+            # else:
+            #     logger.debug(
+            #         f"'value.text' is neither Str nor Dict nor None (is '{type(json_object['value']['text'])}')")
+            #     pprint(json_object)
+            #     value = "UNKNOWN TYPE"
+            #
+            # if "name" not in json_object["value"]:
+            #     # logger.debug("'value.name' not available")
+            #     value = "NO_VALUE_NAME_KEY"
+            # elif json_object["value"]["name"] is None:
+            #     # logger.debug("'value.name' is None")
+            #     value = "NOT_SET"
+            # elif isinstance(json_object["value"]["name"], str):
+            #     # logger.debug("'value.name' is Str")
+            #     value = json_object["value"]["name"]
+            # else:
+            #     logger.debug(
+            #         f"'value.name' is neither Str nor Dict nor None (is '{type(json_object['value']['name'])}')")
+            #     pprint(json_object)
+            #     value = "UNKNOWN TYPE"
 
-        # pprint(issue.custom_fields2)
+        else:
+            logger.debug(f"'value' is neither Str nor Dict nor None (is '{type(json_object['value'])}')")
+            #pprint(json_object)
+            value = "UNKNOWN TYPE"
 
-    logger.debug(f"Got {len(issues)} issues")
-    return issues
+        issue.custom_fields2[json_object["name"]] = value
+        logger.debug(f"Added custom field '{json_object['name']}'='{value}' to issue {issue.id_readable}")
+
+    # pprint(issue.custom_fields2)
+
+    logger.debug(f"Added custom fields to issue {issue.id_readable}")
+    return issue
 
 
 def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> List[Issue]:
     logger.debug(f"Getting issues for query '{query}'...")
 
-    issues = get_enhanced_issues_by_query(youtrack_client, query)
+    issues = get_issues.sync(client=youtrack_client, top=10000, query=query)
+    logger.debug(f"Response contains {len(issues)} issues")
+
+    for issue in issues:
+        add_custom_fields(youtrack_client, issue)
 
     for issue in issues:
         process_attachments(youtrack_client, issue)
