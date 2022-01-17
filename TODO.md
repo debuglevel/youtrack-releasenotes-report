@@ -1,2 +1,0 @@
-## Use query to filter issues
-e.g. `Entwicklungspaket: {Paket 3 (2021-05-27 - ??-??)} state: {in Test}, {in Umsetzung}, {in Einplanung}, {in Produktion}, {in Genehmigung}, {in Aufwandsschätzung}, {organisatorische Klammer}` instead of `field` and `field_value`. 
