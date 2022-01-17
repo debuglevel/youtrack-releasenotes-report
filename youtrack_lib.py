@@ -78,9 +78,9 @@ def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue):
                                                                                               destination_name)
 
 
-def get_issues_(youtrack_client: AuthenticatedClient) -> List[Issue]:
-    logger.debug(f"Getting all issues...")
-    issues = get_issues.sync(client=youtrack_client, top=10000)
+def get_enhanced_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> List[Issue]:
+    logger.debug(f"Getting all issues by query '{query}'...")
+    issues = get_issues.sync(client=youtrack_client, top=10000, query=query)
     logger.debug(f"Response contains {len(issues)} issues")
 
     # The IssueCustomField model seems broken and not containing fields like "name" and "value".
@@ -174,30 +174,16 @@ def get_issues_(youtrack_client: AuthenticatedClient) -> List[Issue]:
     return issues
 
 
-def get_issues_by_field(youtrack_client: AuthenticatedClient, field_name: str, field_value: str) -> List[Issue]:
-    logger.debug(f"Getting issues for '{field_name}'='{field_value}'")
+def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> List[Issue]:
+    logger.debug(f"Getting issues for query '{query}'...")
 
-    issues = get_issues_(youtrack_client)
+    issues = get_enhanced_issues_by_query(youtrack_client, query)
 
-    filtered_issues: List[Issue] = []
     for issue in issues:
-        #pprint(issue)
-        try:
-            if issue.custom_fields2[field_name] == field_value:
-                logger.debug(f"Adding {issue.id_readable} because '{field_name}'='{field_value}'")
-                filtered_issues.append(issue)
-            else:
-                logger.debug(
-                    f"Not adding {issue.id_readable} because '{field_name}'!='{field_value} (but '{issue.custom_fields2[field_name]}')'")
-        except KeyError:
-            # CAVEAT: default values seem to be missing here :-(
-            logger.debug(f"Not adding {issue.id_readable} because '{field_name}' is missing")
+        process_attachments(youtrack_client, issue)
 
-    for filtered_issue in filtered_issues:
-        process_attachments(youtrack_client, filtered_issue)
-
-    logger.debug(f"Got {len(filtered_issues)} issues for '{field_name}'='{field_value}'")
-    return filtered_issues
+    logger.debug(f"Got {len(issues)} issues for query '{query}'")
+    return issues
 
 
 def create_client(youtrack_url: str, hub_url: str, token: str) -> AuthenticatedClient:
