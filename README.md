@@ -10,7 +10,7 @@ This runs the app (fetches issues and writes markdown) and converts it to variou
 docker build -t youtrack-release-notes . ; docker run -ti --add-host youtrack.hosts:10.101.33.8 --env-file=environment.prod -v "${PWD}/out.docker:/app/out" youtrack-release-notes
 ```
 
-Maybe use this `&&` thign instead for PowerShell:
+Maybe use this `&&` thing instead for PowerShell:
 ```shell
 `(docker build -t youtrack-release-notes .) -and (docker run -ti -v "${PWD}/out:/data" youtrack-release-notes)`
 ```
