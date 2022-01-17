@@ -23,7 +23,7 @@ def filter_issues_by_subsystem(issues: List[Issue], subsystem: str) -> List[Issu
         if issue.custom_fields2["Teilsystem"] == subsystem:
             if issue not in filtered_issues:
                 filtered_issues.append(issue)
-                logger.debug(f"Added issue '{issue}'")
+                logger.debug(f"Added issue '{issue.id_readable}'")
 
     logger.debug(f"Got {len(filtered_issues)} issues for subsystem '{subsystem}' from {len(issues)} issues")
     return filtered_issues
@@ -104,7 +104,7 @@ def get_issues_(youtrack_client: AuthenticatedClient) -> List[Issue]:
                                                                                          ).content
             json_string = str(json_bytes, 'UTF-8')
             json_object = json.loads(json_string)
-            pprint(json_object)
+            #pprint(json_object)
 
             # logger.debug(f"Added custom field '{json_object['name']}'='{json_object['value']}'...")
             # json_object.value can be the value or json_object.value.name
@@ -162,7 +162,7 @@ def get_issues_(youtrack_client: AuthenticatedClient) -> List[Issue]:
 
             else:
                 logger.debug(f"'value' is neither Str nor Dict nor None (is '{type(json_object['value'])}')")
-                pprint(json_object)
+                #pprint(json_object)
                 value = "UNKNOWN TYPE"
 
             issue.custom_fields2[json_object["name"]] = value
@@ -181,7 +181,7 @@ def get_issues_by_field(youtrack_client: AuthenticatedClient, field_name: str, f
 
     filtered_issues: List[Issue] = []
     for issue in issues:
-        pprint(issue)
+        #pprint(issue)
         try:
             if issue.custom_fields2[field_name] == field_value:
                 logger.debug(f"Adding {issue.id_readable} because '{field_name}'='{field_value}'")
