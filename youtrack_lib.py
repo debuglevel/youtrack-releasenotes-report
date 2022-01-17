@@ -1,6 +1,7 @@
 import json
 import logging
 import urllib.request
+import requests
 from typing import List, Set
 from pprint import pprint
 
@@ -50,7 +51,8 @@ def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue):
 
     for attachment in attachments:
         logger.debug(f"Processing attachment '{attachment.name}' for issue {issue.id_readable}...")
-        url = attachment.url
+        # attachment.url is in the form "/api/..." although the base url already contains "/api/"
+        url = youtrack_client.youtrack_base_url + "/.." + attachment.url
         original_name = attachment.name
         destination_name = f"{issue.id_readable}-{attachment.id}-{attachment.name}"
         destination_file = f"out/{destination_name}"
@@ -67,7 +69,9 @@ def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue):
             continue
 
         logger.debug(f"Downloading {url} to {destination_file} ...")
-        urllib.request.urlretrieve(url, destination_file)
+
+        response = requests.get(url, allow_redirects=True)
+        open(destination_file, 'wb').write(response.content)
 
         logger.debug(f"Rewriting markdown to point to downloaded file...")
         issue.custom_fields2["Release Notes"] = issue.custom_fields2["Release Notes"].replace(original_name,
@@ -85,15 +89,19 @@ def get_issues_(youtrack_client: AuthenticatedClient) -> List[Issue]:
     for issue in issues:
         logger.debug(f"Getting custom fields for {issue.id_readable}...")
         custom_fields = get_issues_id_custom_fields.sync(client=youtrack_client, id=issue.id)
-        logger.debug(f"Response has {len(custom_fields)} in issue {issue.id_readable}")
+        logger.debug(f"Response has {len(custom_fields)} custom fields in issue {issue.id_readable}")
 
         issue.custom_fields2 = dict()
 
         for custom_field in custom_fields:
             logger.debug(f"Getting custom field {custom_field.id} for {issue.id_readable}...")
+
+            # CAVEAT: Setting fields to include "text" and "markdownText" in value field, which is not queried by default.
             json_bytes = get_issues_id_custom_fields_issue_custom_field_id.sync_detailed(client=youtrack_client,
                                                                                         id=issue.id,
-                                                                                        issue_custom_field_id=custom_field.id).content
+                                                                                        issue_custom_field_id=custom_field.id,
+                                                                                        fields="$type,id,name,projectCustomField($type,field($type,fieldType($type,id),id,localizedName,name),id),value($type,id,name,text,markdownText)"
+                                                                                         ).content
             json_string = str(json_bytes, 'UTF-8')
             json_object = json.loads(json_string)
             pprint(json_object)
@@ -113,20 +121,44 @@ def get_issues_(youtrack_client: AuthenticatedClient) -> List[Issue]:
             elif isinstance(json_object["value"], dict):
                 # logger.debug("'value' is Dict")
 
-                if "name" not in json_object["value"]:
-                    # logger.debug("'value.name' not available")
-                    value = "NO_VALUE_NAME_KEY"
-                elif json_object["value"]["name"] is None:
-                    # logger.debug("'value.name' is None")
-                    value = "NOT_SET"
-                elif isinstance(json_object["value"]["name"], str):
+                if "text" in json_object["value"] and isinstance(json_object["value"]["text"], str):
+                    # logger.debug("'value.text' is Str")
+                    value = json_object["value"]["text"]
+                elif "name" in json_object["value"] and isinstance(json_object["value"]["name"], str):
                     # logger.debug("'value.name' is Str")
                     value = json_object["value"]["name"]
                 else:
-                    logger.debug(
-                        f"'value.name' is neither Str nor Dict nor None (is '{type(json_object['value']['name'])}')")
-                    pprint(json_object)
-                    value = "UNKNOWN TYPE"
+                    value = "UNHANDLED CASE"
+
+                # if "text" not in json_object["value"]:
+                #     # logger.debug("'value.name' not available")
+                #     value = "NO_VALUE_TEXT_KEY"
+                # elif json_object["value"]["text"] is None:
+                #     # logger.debug("'value.name' is None")
+                #     value = "NOT_SET"
+                # elif isinstance(json_object["value"]["text"], str):
+                #     # logger.debug("'value.name' is Str")
+                #     value = json_object["value"]["text"]
+                # else:
+                #     logger.debug(
+                #         f"'value.text' is neither Str nor Dict nor None (is '{type(json_object['value']['text'])}')")
+                #     pprint(json_object)
+                #     value = "UNKNOWN TYPE"
+                #
+                # if "name" not in json_object["value"]:
+                #     # logger.debug("'value.name' not available")
+                #     value = "NO_VALUE_NAME_KEY"
+                # elif json_object["value"]["name"] is None:
+                #     # logger.debug("'value.name' is None")
+                #     value = "NOT_SET"
+                # elif isinstance(json_object["value"]["name"], str):
+                #     # logger.debug("'value.name' is Str")
+                #     value = json_object["value"]["name"]
+                # else:
+                #     logger.debug(
+                #         f"'value.name' is neither Str nor Dict nor None (is '{type(json_object['value']['name'])}')")
+                #     pprint(json_object)
+                #     value = "UNKNOWN TYPE"
 
             else:
                 logger.debug(f"'value' is neither Str nor Dict nor None (is '{type(json_object['value'])}')")
