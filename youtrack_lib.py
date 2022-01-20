@@ -172,7 +172,7 @@ def fetch_custom_fields(youtrack_client: AuthenticatedClient, issue: Issue) -> I
     return issue
 
 
-def remove_missing_releasenotes(issues):
+def remove_missing_releasenotes(issues: List[Issue]) -> List[Issue]:
     logger.debug(f"Removing issues with empty release notes (original count: {len(issues)})...")
 
     new_issues = []
@@ -189,11 +189,19 @@ def remove_missing_releasenotes(issues):
     return new_issues
 
 
+def sort_issues(issues: List[Issue]) -> List[Issue]:
+    # this is actually just to ease debugging
+    logger.debug(f"Sorting {len(issues)} issues...")
+    return sorted(issues, key=lambda issue: issue.id)
+
+
 def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> List[Issue]:
     logger.debug(f"Getting issues for query '{query}'...")
 
     issues = get_issues.sync(client=youtrack_client, top=10000, query=query)
     logger.debug(f"Response contains {len(issues)} issues")
+
+    issues = sort_issues(issues)
 
     for issue in issues:
         fetch_custom_fields(youtrack_client, issue)
