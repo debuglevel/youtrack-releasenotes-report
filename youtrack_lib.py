@@ -172,6 +172,23 @@ def fetch_custom_fields(youtrack_client: AuthenticatedClient, issue: Issue) -> I
     return issue
 
 
+def remove_missing_releasenotes(issues):
+    logger.debug(f"Removing issues with empty release notes (original count: {len(issues)})...")
+
+    new_issues = []
+    for issue in issues:
+        if not ('Release Notes' not in issue.custom_fields2
+                or issue.custom_fields2['Release Notes'] == "NOT_SET"
+                or issue.custom_fields2['Release Notes'] == ""):
+            logger.debug(f"Issue {issue.id_readable} has release notes; keeping it...")
+            new_issues.append(issue)
+        else:
+            logger.debug(f"Issue {issue.id_readable} has NO release notes; removing it...")
+
+    logger.debug(f"Removed issues with empty release notes (original count: {len(issues)}, new: {len(new_issues)})")
+    return new_issues
+
+
 def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> List[Issue]:
     logger.debug(f"Getting issues for query '{query}'...")
 
@@ -180,6 +197,8 @@ def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> Lis
 
     for issue in issues:
         fetch_custom_fields(youtrack_client, issue)
+
+    issues = remove_missing_releasenotes(issues)
 
     for issue in issues:
         process_attachments(youtrack_client, issue)
