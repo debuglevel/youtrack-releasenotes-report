@@ -78,7 +78,7 @@ def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue):
                                                                                               destination_name)
 
 
-def add_custom_fields(youtrack_client: AuthenticatedClient, issue: Issue) -> Issue:
+def fetch_custom_fields(youtrack_client: AuthenticatedClient, issue: Issue) -> Issue:
     logger.debug(f"Adding custom fields to issue {issue.id_readable}...")
 
     # The IssueCustomField model seems broken and not containing fields like "name" and "value".
@@ -179,7 +179,7 @@ def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> Lis
     logger.debug(f"Response contains {len(issues)} issues")
 
     for issue in issues:
-        add_custom_fields(youtrack_client, issue)
+        fetch_custom_fields(youtrack_client, issue)
 
     for issue in issues:
         process_attachments(youtrack_client, issue)
