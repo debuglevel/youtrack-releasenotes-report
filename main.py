@@ -16,7 +16,7 @@ def main(youtrack_url: str, hub_url: str, token: str, output_basename: str, titl
     logger.info(f"Creating YouTrack Client...")
     youtrack_client = youtrack_lib.create_client(youtrack_url, hub_url, token)
 
-    logger.info(f"Getting issues matvhing query '{query}'...")
+    logger.info(f"Getting issues matching query '{query}'...")
     issues = youtrack_lib.get_issues_by_query(youtrack_client, query)
     # issues = youtrack_lib.get_issues_by_field(youtrack_client, field_name, field_value)
     logger.info(f"Got {len(issues)} issues")
