@@ -1,5 +1,4 @@
 youtrack-rest-client==0.1.5
 Markdown==3.3.4
-xhtml2pdf==0.2.5
 PyYAML==5.4.1
 requests==2.27.1

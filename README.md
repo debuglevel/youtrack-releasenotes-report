@@ -18,11 +18,6 @@ Maybe use this `&&` thing instead for PowerShell:
 `(docker build -t youtrack-release-notes .) -and (docker run -ti -v "${PWD}/out:/data" youtrack-release-notes)`
 ```
 
-## CAVEATS
-
-It seems that the Python package `xhtml2pdf` has some issues with `<img>` on Windows. It' s reported working on Linux, though.
-For now, it is not used at all and `pandoc` is used instead. 
-
 ## Python development cheat sheet
 
 ```shell
