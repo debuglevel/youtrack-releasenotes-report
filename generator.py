@@ -62,17 +62,17 @@ def get_markdown_for_issue(issue: Issue, field_name: str):
     # subsystem = issue['Teilsystem']
     # client = issue['Kunde']
     try:
-        release_notes = issue.custom_fields2[field_name]
+        content = issue.custom_fields2[field_name]
     except KeyError:
-        release_notes = None
+        content = None
 
     title = f"{id} {summary}"
 
-    if release_notes is not None:
+    if content is not None:
         markdown_string = f"""
 ## {title}
 
-{release_notes}
+{content}
 
 
         """
