@@ -66,9 +66,8 @@ def get_markdown_for_issue(issue: Issue):
     except KeyError:
         release_notes = None
 
-    title = f"{id} {summary}"
-
     if release_notes is not None:
+        title = f"{id} {summary}"
         markdown_string = f"""
 ## {title}
 
