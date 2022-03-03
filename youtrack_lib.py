@@ -172,7 +172,7 @@ def fetch_custom_fields(youtrack_client: AuthenticatedClient, issue: Issue) -> I
     return issue
 
 
-def remove_missing_releasenotes(issues: List[Issue], field_name: str) -> List[Issue]:
+def remove_missing_field(issues: List[Issue], field_name: str) -> List[Issue]:
     logger.debug(f"Removing issues with empty {field_name} (original count: {len(issues)})...")
 
     new_issues = []
@@ -206,7 +206,7 @@ def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str, field_
     for issue in issues:
         fetch_custom_fields(youtrack_client, issue)
 
-    issues = remove_missing_releasenotes(issues, field_name)
+    issues = remove_missing_field(issues, field_name)
 
     for issue in issues:
         process_attachments(youtrack_client, issue, field_name)
