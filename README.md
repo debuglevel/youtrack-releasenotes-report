@@ -1,13 +1,9 @@
-# YouTrack Release Notes Report
+# YouTrack Field Report
 
-Connects to YouTrack and fetches all issues meeting certain criteria. Puts them in a Markdown file and converts it into
-various document files.
-
-## Prerequisite
-* Assumes there is a custom "Release Notes" field.
+Connects to YouTrack and fetches all issues meeting certain criteria. Extracts a configurable field, puts it in a Markdown file and converts it into various document files.
 
 ## Run the app to fetch the Markdown stuff
-This runs the app (fetches issues and writes markdown) and converts it to various document formats afterwards vie `pandoc`.
+This runs the app (fetches issues and writes Markdown) and converts it to various document formats afterwards vie `pandoc`.
 
 ```shell
 docker build -t youtrack-release-notes . ; docker run -ti --add-host youtrack.hosts:10.101.33.8 --env-file=environment.prod -v "${PWD}/out.docker:/app/out" youtrack-release-notes

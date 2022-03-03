@@ -28,7 +28,7 @@ def main(youtrack_url: str, hub_url: str, token: str, output_basename: str, titl
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='YouTrack Release Notes Report')
+    parser = argparse.ArgumentParser(description='YouTrack Field Report')
 
     parser.add_argument('youtrack_url', type=str,
                         help='YouTrack URL (e.g. https://youtrack.jetbrains.com/api)')
