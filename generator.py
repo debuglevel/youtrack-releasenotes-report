@@ -28,8 +28,8 @@ def get_markdown(issues: List[Issue], title: str):
 
 
 def write_markdown_file(filename: str, markdown_string: str):
-    with open(filename, "w", encoding="utf8") as md_file:
-        md_file.write(markdown_string)
+    with open(filename, "w", encoding="utf8") as markdown_file:
+        markdown_file.write(markdown_string)
 
 
 def get_markdown_for_frontmatter(title: str):
