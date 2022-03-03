@@ -1,4 +1,5 @@
 QUERY=Entwicklungspaket: {Paket 3 (2021-05-27 - ??-??)} state: {in Test}, {in Umsetzung}, {in Einplanung}, {in Produktion}, {in Genehmigung}, {in Aufwandsschätzung}, {organisatorische Klammer}
+FIELD=Release Notes
 OUTPUT_BASENAME=Release Notes
 YOUTRACK_URL=http://youtrack:8080/api
 HUB_URL=http://youtrack:8080/hub/api/rest

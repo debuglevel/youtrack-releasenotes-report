@@ -45,7 +45,7 @@ def get_subsystems_from_issues(issues: List[Issue]) -> List[str]:
     return subsystems
 
 
-def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue):
+def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue, field_name: str):
     logger.debug(f"Processing attachments for issue {issue.id_readable} (if any)...")
     attachments: List[IssueAttachment] = get_issues_id_attachments.sync(client=youtrack_client, id=issue.id)
 
@@ -57,15 +57,15 @@ def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue):
         destination_name = f"{issue.id_readable}-{attachment.id}-{attachment.name}"
         destination_file = f"out/{destination_name}"
 
-        if "Release Notes" not in issue.custom_fields2:
-            logger.debug(f"Skipping '{attachment.name}' as no Release Notes found...")
+        if field_name not in issue.custom_fields2:
+            logger.debug(f"Skipping '{attachment.name}' as no '{field_name}' found...")
             continue
 
-        logger.debug("Release Notes:")
-        pprint(issue.custom_fields2["Release Notes"])
+        logger.debug(f"{field_name}:")
+        pprint(issue.custom_fields2[field_name])
 
-        if original_name not in issue.custom_fields2["Release Notes"]:
-            logger.debug(f"Skipping '{attachment.name}' as not referenced in {issue.id_readable} Release Notes...")
+        if original_name not in issue.custom_fields2[field_name]:
+            logger.debug(f"Skipping '{attachment.name}' as not referenced in {issue.id_readable} {field_name}...")
             continue
 
         logger.debug(f"Downloading {url} to {destination_file} ...")
@@ -74,7 +74,7 @@ def process_attachments(youtrack_client: AuthenticatedClient, issue: Issue):
         open(destination_file, 'wb').write(response.content)
 
         logger.debug(f"Rewriting markdown to point to downloaded file...")
-        issue.custom_fields2["Release Notes"] = issue.custom_fields2["Release Notes"].replace(original_name,
+        issue.custom_fields2[field_name] = issue.custom_fields2[field_name].replace(original_name,
                                                                                               destination_name)
 
 
@@ -172,20 +172,20 @@ def fetch_custom_fields(youtrack_client: AuthenticatedClient, issue: Issue) -> I
     return issue
 
 
-def remove_missing_releasenotes(issues: List[Issue]) -> List[Issue]:
-    logger.debug(f"Removing issues with empty release notes (original count: {len(issues)})...")
+def remove_missing_releasenotes(issues: List[Issue], field_name: str) -> List[Issue]:
+    logger.debug(f"Removing issues with empty {field_name} (original count: {len(issues)})...")
 
     new_issues = []
     for issue in issues:
-        if not ('Release Notes' not in issue.custom_fields2
-                or issue.custom_fields2['Release Notes'] == "NOT_SET"
-                or issue.custom_fields2['Release Notes'] == ""):
-            logger.debug(f"Issue {issue.id_readable} has release notes; keeping it...")
+        if not (field_name not in issue.custom_fields2
+                or issue.custom_fields2[field_name] == "NOT_SET"
+                or issue.custom_fields2[field_name] == ""):
+            logger.debug(f"Issue {issue.id_readable} has {field_name}; keeping it...")
             new_issues.append(issue)
         else:
-            logger.debug(f"Issue {issue.id_readable} has NO release notes; removing it...")
+            logger.debug(f"Issue {issue.id_readable} has NO {field_name}; removing it...")
 
-    logger.debug(f"Removed issues with empty release notes (original count: {len(issues)}, new: {len(new_issues)})")
+    logger.debug(f"Removed issues with empty {field_name} (original count: {len(issues)}, new: {len(new_issues)})")
     return new_issues
 
 
@@ -195,7 +195,7 @@ def sort_issues(issues: List[Issue]) -> List[Issue]:
     return sorted(issues, key=lambda issue: issue.id)
 
 
-def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> List[Issue]:
+def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str, field_name: str) -> List[Issue]:
     logger.debug(f"Getting issues for query '{query}'...")
 
     issues = get_issues.sync(client=youtrack_client, top=10000, query=query)
@@ -206,10 +206,10 @@ def get_issues_by_query(youtrack_client: AuthenticatedClient, query: str) -> Lis
     for issue in issues:
         fetch_custom_fields(youtrack_client, issue)
 
-    issues = remove_missing_releasenotes(issues)
+    issues = remove_missing_releasenotes(issues, field_name)
 
     for issue in issues:
-        process_attachments(youtrack_client, issue)
+        process_attachments(youtrack_client, issue, field_name)
 
     logger.debug(f"Got {len(issues)} issues for query '{query}'")
     return issues

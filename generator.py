@@ -12,7 +12,7 @@ from youtrack_lib import get_subsystems_from_issues, filter_issues_by_subsystem
 logger = logging.getLogger(__name__)
 
 
-def get_markdown(issues: List[Issue], title: str):
+def get_markdown(issues: List[Issue], title: str, field_name: str):
     markdown_string = get_markdown_for_frontmatter(title)
 
     subsystems = get_subsystems_from_issues(issues)
@@ -23,7 +23,7 @@ def get_markdown(issues: List[Issue], title: str):
         subsystem_issues = filter_issues_by_subsystem(issues, subsystem)
         sorted_subsystem_issues = sorted(subsystem_issues, key=lambda issue: int(issue.number_in_project))
         for subsystem_issue in sorted_subsystem_issues:
-            markdown_string += get_markdown_for_issue(subsystem_issue)
+            markdown_string += get_markdown_for_issue(subsystem_issue, field_name)
 
     return markdown_string
 
@@ -53,7 +53,7 @@ def get_markdown_for_subsystem(subsystem: str):
     return markdown_string
 
 
-def get_markdown_for_issue(issue: Issue):
+def get_markdown_for_issue(issue: Issue, field_name: str):
     id = issue.id_readable
     logger.debug(f"Generating markdown for issue '{id}'...")
 
@@ -62,7 +62,7 @@ def get_markdown_for_issue(issue: Issue):
     # subsystem = issue['Teilsystem']
     # client = issue['Kunde']
     try:
-        release_notes = issue.custom_fields2['Release Notes']
+        release_notes = issue.custom_fields2[field_name]
     except KeyError:
         release_notes = None
 
