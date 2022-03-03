@@ -2,7 +2,6 @@ import logging
 from typing import List
 
 import markdown
-from xhtml2pdf import pisa
 from shutil import copyfile
 
 from youtrack_rest_client.models import Issue
